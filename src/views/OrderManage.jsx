@@ -1,24 +1,32 @@
+// 订单管理
 import React, {Component} from 'react';
-import {Form, Button, Table} from 'antd';
+import {Form, Button, Table, Row, Col} from 'antd';
 import app from './app';
 import {order} from './apiValue';
 import moment from 'moment'
+import {OrderDetailManage} from '../components/DetailManage';
 
-// 登陆界面
+const perPageSize = 100;
+
 class OrderManage extends Component {
     constructor(props) {
         super(props);
         this.state = {
             loading: false,
-            pagination: {},
+            pagination: {
+                showQuickJumper: true,
+                showSizeChanger: true,
+                current: 0,
+                pageSizeOptions: app.pageSizeOptions
+            },
             data: []
         };
     }
 
     columns = [
-        {title: '订单号', fixed: 'left', dataIndex: 'order_no', key: 'order_no'},
+        {title: '订单号', dataIndex: 'order_no', key: 'order_no'},
         {
-            title: '订单类型', fixed: 'left', dataIndex: 'order_type',
+            title: '订单类型', dataIndex: 'order_type',
             render: (orderType) => {
                 let text = '';
                 switch (orderType) {
@@ -133,9 +141,10 @@ class OrderManage extends Component {
         },
         {
             title: '操作',
-            fixed: 'right',
-            dataIndex: '',
-            key: 'x', render: () => <Button type='primary'>详情</Button>
+
+            key: 'x', render: (data) =>
+                <OrderDetailManage
+                    data={data}/>
         },
     ];
 
@@ -144,14 +153,18 @@ class OrderManage extends Component {
         const {loading} = this.state;
         return (
             <span>
-                <Table
-                    columns={this.columns}
-                    dataSource={this.state.data}
-                    rowKey={record => record.order_no}
-                    pagination={this.state.pagination}
-                    loading={this.state.loading}
-                    onChange={this.handleTableChange}
-                />
+            <Row>
+                <Col span={24}>
+                        <Table
+                            columns={this.columns}
+                            dataSource={this.state.data}
+                            rowKey={record => record.order_no}
+                            pagination={this.state.pagination}
+                            loading={this.state.loading}
+                            onChange={this.handleTableChange}
+                        />
+                </Col>
+            </Row>
            </span>
         )
     }
@@ -160,18 +173,24 @@ class OrderManage extends Component {
         this.initTable()
     }
 
-    initTable(params) {
+    initTable() {
         let param = {
             offset: 0,
-            perPageSize: 10,
+            perPageSize: perPageSize,
         };
+        this.setState({loading: true});
         app.post(order.SEARCH_ORDER, param).then((req) => {
+            this.setState({loading: false});
             if (req.code == 200) {
                 this.setState({
                     data: req.data
                 })
             }
         })
+    }
+
+    handleTableChange = (pagination) => {
+        this.setState({pagination})
     }
 
 }

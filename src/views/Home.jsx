@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import {Layout, Dropdown, Menu, Icon} from 'antd';
 import app from './app';
-import { Route, Switch} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 import '../css/home.css'
 import logo from '../image/logo.png';
 
 import OrderManage from './OrderManage'
+import VipManage from "./VipManage";
+
 const {Header, Sider, Content} = Layout;
 // const FormItem = Form.Item;
 // const SubMenu = Menu.SubMenu;
@@ -44,24 +46,30 @@ class Home extends Component {
                                 color: 'white'
                             }}>球联后台管理</span>
                     </div>
-                    <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
+                    <Menu onClick={() => {
+                        this.clickMenuItem()
+                    }} theme="dark" defaultSelectedKeys={['1']} mode="inline">
                         <Menu.Item key="1">
-                            <Icon type="bank" />
+                            <Icon type="bank"/>
                             <span>订单管理</span>
                         </Menu.Item>
+                        <Menu.Item key="2">
+                            <Icon type="credit-card"/>
+                            <span>会员卡管理</span>
+                        </Menu.Item>
                         {/*<SubMenu*/}
-                            {/*key="sub1"*/}
-                            {/*title={<span><Icon type="user"/><span>User</span></span>}*/}
+                        {/*key="sub1"*/}
+                        {/*title={<span><Icon type="user"/><span>User</span></span>}*/}
                         {/*>*/}
-                            {/*<Menu.Item key="3">Tom</Menu.Item>*/}
-                            {/*<Menu.Item key="4">Bill</Menu.Item>*/}
-                            {/*<Menu.Item key="5">Alex</Menu.Item>*/}
+                        {/*<Menu.Item key="3">Tom</Menu.Item>*/}
+                        {/*<Menu.Item key="4">Bill</Menu.Item>*/}
+                        {/*<Menu.Item key="5">Alex</Menu.Item>*/}
                         {/*</SubMenu>*/}
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Header style={{background: '#fff', padding: 0}}>
-                        <span style={{position: 'absolute', right: '20px'}}>
+                    <Header style={{background: '#fff', padding: 0, position: 'relative'}}>
+                        <span style={{position: 'absolute', right: '20px', top: 0}}>
                              <Dropdown overlay={dropdown}>
                                   <span className="welcome exit">
       欢迎用户，{userName} <Icon type="down"/>
@@ -69,12 +77,16 @@ class Home extends Component {
   </Dropdown>
                         </span>
                     </Header>
-                    <Content style={{margin: '16px',padding: 20,
-                        background: '#fff', minHeight: 360,height:'100%'}}>
+                    <Content style={{
+                        margin: 10,
+                        overflowY:'scroll',
+                        background: '#fff', minHeight: 360, height: '100%'
+                    }}>
                         <Switch>
                             <Route path={"/home/orderManage"} component={OrderManage}/>
+                            <Route path={"/home/vipManage"} component={VipManage}/>
                             {/*<Route path={path + "/home/orderDetail/:orderId"}*/}
-                                   {/*component={OrderDetail}/> */}
+                            {/*component={OrderDetail}/> */}
                         </Switch>
 
                     </Content>
@@ -85,20 +97,27 @@ class Home extends Component {
     }
 
     componentDidMount() {
-
+        window._this = this.props;
     };
 
-    handleClickExit=({item, key, keyPath})=> {
-        const _this=this;
+    // 点击退出
+    handleClickExit = ({item, key, keyPath}) => {
+        const _this = this;
         if (key === 'exit') {
             app.clear();
             _this.props.history.push('/login')
         }
     }
 
+    // 是否收起左侧菜单
     onCollapse = (collapsed) => {
         console.log(collapsed);
         this.setState({collapsed});
+    }
+
+    // 点击菜单
+    clickMenuItem() {
+        window._this = this.props;
     }
 }
 

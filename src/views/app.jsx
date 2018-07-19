@@ -5,11 +5,14 @@ import {message} from 'antd'
 import {config} from './config';
 import axios from 'axios';
 import md5 from 'MD5';
+
 const app = {
     serverUrl: config.serverUrl,
     imgServerUrl: config.imgServerUrl,
     fileUrl: config.fileUrl,
     loadIndex: "",
+    pageSizeOptions: ['1', '5', '10', '20', '30', '40', '50'],  //每页显示多少条数目
+
     setToken: function (token) { //存储Token值
         return localStorage.setItem("footballToken", token);  //localStorage没有时间限制的数据存储。添加键值对：localStorage.setItem(key,value)，将value存储到key字段
     },
@@ -53,14 +56,14 @@ const app = {
         localStorage.removeItem(key);
     },
 
-    clear(){
+    clear() {
         localStorage.clear();
     },
 
     post: function (url, data) {
         // 以下两个固定传给服务器的参数
-         data.venue_id = app.getToken();
-        return this.ajax(url, 'POST',data)
+        data.venue_id = app.getToken();
+        return this.ajax(url, 'POST', data)
     },
     get: function (url, data) {
         const option = {form: data, method: 'GET'};
@@ -68,35 +71,39 @@ const app = {
     },
 
     // request-promise请求
-    ajax: function (url, method,data) {
+    ajax: function (url, method, data) {
         return new Promise(function (resolve, reject) {
             axios({
                 method: method,
                 url: app.serverUrl + url,
                 headers: {
                     'Content-Type': 'application/json',
-                    'accessToken':app.getData('accessToken'),
-                    'Accept':'application/json',
-                    'currentUser':app.getData('currentUser'),
+                    'accessToken': app.getData('accessToken'),
+                    'Accept': 'application/json',
+                    'currentUser': app.getData('currentUser'),
                 },
                 data: data
             }).then(function (req) {
-                switch (req.status) {
-                    case 401 :
-                        app.alert("未登录");
+                if (req.status == 200) {
+                    // 409未登录
+                    switch (req.data.code) {
+                        case 409 :
+                            app.alert("未登录");
+                            localStorage.clear();
+                            window._this.history.push('/login');
+                            break;
+                        case 403 :
+                            app.alert("权限不足，禁止访问");
+                            break;
+                        case 200 :
+                            resolve(req.data);
+                            break;
+                        default:
+                            app.alert("未知错误");
+                            break;
+                    }
+                } else {
 
-                        // app.removeCookie('token');
-                        // app.removeToken('token');
-                        break;
-                    case 403 :
-                        app.alert("权限不足，禁止访问");
-                        break;
-                    case 200 :
-                        resolve(req.data);
-                        break;
-                    default:
-                        app.alert("未知错误");
-                        break;
                 }
             }).catch(function (error) {
                 app.alert(error.message);

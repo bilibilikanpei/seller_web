@@ -60,10 +60,10 @@ class Login extends Component {
     }
 
     handleSubmit = (e) => {
-        let that = this;
+        const _this = this;
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                this.setState({loading: true});
+                _this.setState({loading: true});
                 values.password = hex_md5(hex_md5(values.password) + 'xbcrm');
                 app.post(login.TO_LOGIN, values).then(req => {
                     this.setState({loading: false});
@@ -74,7 +74,7 @@ class Login extends Component {
                         app.setData('userName',values.loginName);
                         app.setData('accessToken',data.token);
                         app.setData('currentUser',data.id);
-                        this.props.history.push('home/orderManage')
+                        _this.props.history.push('home/orderManage')
                     }
                     else {
                         app.alert(req.msg, 'error', 3);
